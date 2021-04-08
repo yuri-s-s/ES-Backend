@@ -67,15 +67,15 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const users = await PreUserService.getAll();
+    const preUsers = await PreUserService.getAll(req.query);
 
-    if (!users) {
+    if (!preUsers) {
       return res
         .status(404)
         .json({ error: 'Nenhum pre usuário foi encontrado' });
     }
 
-    return res.status(200).json({ users });
+    return res.status(200).json({ preUsers });
   } catch (error) {
     return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
   }

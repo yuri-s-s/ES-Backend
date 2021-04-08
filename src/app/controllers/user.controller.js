@@ -103,7 +103,7 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const users = await UserService.getAll();
+    const users = await UserService.getAll(req.query);
 
     if (!users) {
       return res.status(404).json({ error: 'Nenhum usuário foi encontrado' });

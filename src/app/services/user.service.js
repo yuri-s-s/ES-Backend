@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const { User } = require('../models');
 
 const create = async (data) => {
@@ -13,10 +15,71 @@ const create = async (data) => {
   return user;
 };
 
-const getAll = async () => {
-  const users = await User.findAll({
-    attributes: ['id', 'name', 'email', 'cpf', 'role', 'preUserId'],
-  });
+const getAll = async (query) => {
+  const {
+    name, email, cpf, role,
+  } = query;
+
+  let where = {};
+
+  if (name) {
+    where = {
+      ...where,
+      name: {
+        [Op.iLike]: `%${name}%`,
+      },
+    };
+  }
+
+  if (email) {
+    where = {
+      ...where,
+      email: {
+        [Op.iLike]: `%${email}%`,
+      },
+    };
+  }
+
+  if (cpf) {
+    where = {
+      ...where,
+      cpf: {
+        [Op.iLike]: `%${cpf}%`,
+      },
+    };
+  }
+
+  if (role) {
+    where = {
+      ...where,
+      role,
+    };
+  }
+
+  const page = parseInt(query.page, 10);
+  const pageSize = parseInt(query.pageSize, 10);
+  let offset = null;
+  let users = null;
+
+  if (page && pageSize) offset = (page - 1) * pageSize;
+
+  if (offset !== null) {
+    const options = {
+      limit: pageSize,
+      offset,
+      distinct: true,
+      attributes: ['id', 'name', 'email', 'cpf', 'role', 'preUserId'],
+      where,
+    };
+    users = await User.findAndCountAll(options);
+
+    users.pages = Math.ceil(users.count / pageSize);
+  } else {
+    users = await User.findAll({
+      attributes: ['id', 'name', 'email', 'cpf', 'role', 'preUserId'],
+      where,
+    });
+  }
 
   if (!users) {
     return null;

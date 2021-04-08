@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const { PreUser } = require('../models');
 
 const create = async (data) => {
@@ -10,16 +12,57 @@ const create = async (data) => {
   return preUser;
 };
 
-const getAll = async () => {
-  const users = await PreUser.findAll({
-    attributes: ['id', 'cpf', 'completed'],
-  });
+const getAll = async (query) => {
+  const { cpf, completed } = query;
 
-  if (!users) {
+  let where = {};
+
+  if (cpf) {
+    where = {
+      ...where,
+      cpf: {
+        [Op.iLike]: `%${cpf}%`,
+      },
+    };
+  }
+
+  if (completed !== undefined) {
+    where = {
+      ...where,
+      completed: completed === 'true',
+    };
+  }
+
+  const page = parseInt(query.page, 10);
+  const pageSize = parseInt(query.pageSize, 10);
+  let offset = null;
+  let preUsers = null;
+
+  if (page && pageSize) offset = (page - 1) * pageSize;
+
+  if (offset !== null) {
+    const options = {
+      limit: pageSize,
+      offset,
+      distinct: true,
+      attributes: ['id', 'cpf', 'completed'],
+      where,
+    };
+    preUsers = await PreUser.findAndCountAll(options);
+
+    preUsers.pages = Math.ceil(preUsers.count / pageSize);
+  } else {
+    preUsers = await PreUser.findAll({
+      attributes: ['id', 'cpf', 'completed'],
+      where,
+    });
+  }
+
+  if (!preUsers) {
     return null;
   }
 
-  return users;
+  return preUsers;
 };
 
 const getById = async (id) => {
