@@ -1,6 +1,19 @@
 const UserService = require('../services/user.service');
+const PreUserService = require('../services/preUser.service');
 
-const createUser = async (req, res) => {
+function validateEmail(email) {
+  const validate = /\S+@\S+\.\S+/;
+
+  return validate.test(email);
+}
+
+function validateCpf(cpf) {
+  const newCpf = cpf.replace(/[^\d]/g, '');
+
+  return newCpf;
+}
+
+const create = async (req, res) => {
   try {
     const {
       name, email, cpf, password,
@@ -14,15 +27,27 @@ const createUser = async (req, res) => {
       return res.status(400).json({ error: 'O email é obrigatório' });
     }
 
+    if (!validateEmail(email)) {
+      return res
+        .status(400)
+        .json({ error: 'O formato do email passado está invalido' });
+    }
+
     if (!cpf) {
       return res.status(400).json({ error: 'O cpf é obrigatório' });
+    }
+
+    const newCpf = validateCpf(cpf);
+
+    if (newCpf.length !== 11) {
+      return res.status(400).json({ error: 'O cpf passado está invalido' });
     }
 
     if (!password) {
       return res.status(400).json({ error: 'A senha é obrigatória' });
     }
 
-    const verifyUser = await UserService.getByCpf(cpf);
+    const verifyUser = await UserService.getByCpf(newCpf);
 
     if (verifyUser) {
       return res
@@ -30,7 +55,39 @@ const createUser = async (req, res) => {
         .json({ error: 'Já existe um usuário com esse cpf' });
     }
 
-    const user = await UserService.createUser(req.body);
+    const verifyUserByEmail = await UserService.getByEmail(email);
+
+    if (verifyUserByEmail) {
+      return res
+        .status(400)
+        .json({ error: 'Já existe um usuário com esse email' });
+    }
+
+    let data = {
+      name,
+      email,
+      cpf: newCpf,
+      password,
+    };
+
+    const verifyPreUser = await PreUserService.getByCpf(newCpf);
+
+    if (verifyPreUser && !verifyPreUser.completed) {
+      data = {
+        ...data,
+        role: 'manager',
+        preUserId: verifyPreUser.id,
+      };
+
+      await PreUserService.update(verifyPreUser.id);
+    } else {
+      data = {
+        ...data,
+        role: 'client',
+      };
+    }
+
+    const user = await UserService.create(data);
 
     if (!user) {
       return res
@@ -46,7 +103,7 @@ const createUser = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const users = await UserService.getAll();
+    const users = await UserService.getAll(req.query);
 
     if (!users) {
       return res.status(404).json({ error: 'Nenhum usuário foi encontrado' });
@@ -108,7 +165,7 @@ const update = async (req, res) => {
 };
 
 module.exports = {
-  createUser,
+  create,
   getAll,
   getById,
   remove,
