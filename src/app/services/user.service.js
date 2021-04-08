@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 
 const { User } = require('../models');
+const util = require('./util.service');
 
 const create = async (data) => {
   const user = await User.create(data);
@@ -12,7 +13,10 @@ const create = async (data) => {
   delete user.dataValues.passwordHash;
   delete user.dataValues.password;
 
-  return user;
+  return {
+    user,
+    token: util.generateToken({ id: user.id, email: user.email }),
+  };
 };
 
 const getAll = async (query) => {
