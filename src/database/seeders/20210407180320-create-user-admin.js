@@ -13,7 +13,7 @@ const ADMIN_USER = {
 
 module.exports = {
   up: async (queryInterface) => {
-    ADMIN_USER.passwordHash = await bcrypt.hash('12345678', 5);
+    ADMIN_USER.passwordHash = await bcrypt.hash('12345', 5);
     const existingUsers = await queryInterface.rawSelect(
       'Users',
       { where: { cpf: ADMIN_USER.cpf } },
