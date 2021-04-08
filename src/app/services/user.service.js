@@ -1,6 +1,6 @@
 const { User } = require('../models');
 
-const createUser = async (data) => {
+const create = async (data) => {
   const user = await User.create(data);
 
   if (!user) {
@@ -15,7 +15,7 @@ const createUser = async (data) => {
 
 const getAll = async () => {
   const users = await User.findAll({
-    attributes: ['id', 'name', 'email', 'cpf'],
+    attributes: ['id', 'name', 'email', 'cpf', 'role', 'preUserId'],
   });
 
   if (!users) {
@@ -27,7 +27,7 @@ const getAll = async () => {
 
 const getById = async (id) => {
   const user = await User.findByPk(id, {
-    attributes: ['id', 'name', 'email', 'cpf'],
+    attributes: ['id', 'name', 'email', 'cpf', 'role'],
   });
 
   if (!user) {
@@ -39,7 +39,7 @@ const getById = async (id) => {
 
 const getByCpf = async (cpf) => {
   const user = await User.findOne({
-    attributes: ['id', 'name', 'email', 'cpf'],
+    attributes: ['id', 'name', 'email', 'cpf', 'role'],
     where: {
       cpf,
     },
@@ -52,9 +52,24 @@ const getByCpf = async (cpf) => {
   return user;
 };
 
+const getByEmail = async (email) => {
+  const user = await User.findOne({
+    attributes: ['id'],
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return user;
+};
+
 const remove = async (id) => {
   const user = await User.findByPk(id, {
-    attributes: ['id', 'name', 'email', 'cpf'],
+    attributes: ['id', 'name', 'email', 'cpf', 'role'],
   });
 
   if (!user) {
@@ -68,7 +83,7 @@ const remove = async (id) => {
 
 const update = async (id, name) => {
   const user = await User.findByPk(id, {
-    attributes: ['id', 'name', 'email', 'cpf'],
+    attributes: ['id', 'name', 'email', 'cpf', 'role'],
   });
 
   if (!user) {
@@ -80,11 +95,27 @@ const update = async (id, name) => {
   return user;
 };
 
+const updateRole = async (id, role, preUserId) => {
+  const user = await User.findByPk(id, {
+    attributes: ['id', 'name', 'email', 'cpf', 'role'],
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  await user.update({ role, preUserId });
+
+  return user;
+};
+
 module.exports = {
-  createUser,
+  create,
   getAll,
   getById,
   getByCpf,
+  getByEmail,
   remove,
   update,
+  updateRole,
 };
