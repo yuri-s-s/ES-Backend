@@ -13,4 +13,10 @@ router.post(
   SlotController.create,
 );
 
+router.get(
+  '/calendar/:calendarId/existSlot',
+  permission(MANAGER),
+  SlotController.verifySlot,
+);
+
 module.exports = router;
