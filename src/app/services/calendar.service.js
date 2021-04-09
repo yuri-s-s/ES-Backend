@@ -1,4 +1,4 @@
-const { Calendar, Slot } = require('../models');
+const { Calendar, Slot, User } = require('../models');
 
 const create = async () => {
   const calendar = await Calendar.create();
@@ -27,6 +27,13 @@ const getCalendarWithSlots = async (calendarId) => {
         model: Slot,
         as: 'slots',
         attributes: ['id', 'initialDate', 'finalDate', 'qtdVaccine'],
+        include: [
+          {
+            model: User,
+            as: 'users',
+            attributes: ['id', 'name', 'cpf'],
+          },
+        ],
       },
     ],
   });

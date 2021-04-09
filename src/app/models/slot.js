@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'calendarId',
         as: 'calendar',
       });
+      Slot.hasMany(models.User, {
+        foreignKey: 'firstSlotId',
+        as: 'users',
+      });
     }
   }
   Slot.init(
