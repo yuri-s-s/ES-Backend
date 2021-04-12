@@ -6,7 +6,7 @@ const ADMIN_USER = {
   role: 'admin',
   name: 'ADMIN VACINIMIN',
   email: 'admin@vacinimin.com',
-  cpf: '000.000.000-00',
+  cpf: '00000000000',
   createdAt: new Date(),
   updatedAt: new Date(),
 };

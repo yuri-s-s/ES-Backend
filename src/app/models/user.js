@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'preUserId',
         as: 'preUser',
       });
+      User.belongsTo(models.Slot, {
+        foreignKey: 'firstSlotId',
+        as: 'slot',
+      });
     }
   }
   User.init(

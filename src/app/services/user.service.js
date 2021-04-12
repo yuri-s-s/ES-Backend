@@ -94,7 +94,7 @@ const getAll = async (query) => {
 
 const getById = async (id) => {
   const user = await User.findByPk(id, {
-    attributes: ['id', 'name', 'email', 'cpf', 'role'],
+    attributes: ['id', 'name', 'email', 'cpf', 'role', 'firstSlotId'],
   });
 
   if (!user) {
@@ -176,6 +176,16 @@ const updateRole = async (id, role, preUserId) => {
   return user;
 };
 
+const associateUserFirstSlot = async (slotId, userId) => {
+  const user = await User.findByPk(userId);
+
+  await user.update({
+    firstSlotId: slotId,
+  });
+
+  return user;
+};
+
 module.exports = {
   create,
   getAll,
@@ -185,4 +195,5 @@ module.exports = {
   remove,
   update,
   updateRole,
+  associateUserFirstSlot,
 };
