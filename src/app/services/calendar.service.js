@@ -1,7 +1,7 @@
 const { Calendar, Slot, User } = require('../models');
 
-const create = async () => {
-  const calendar = await Calendar.create();
+const create = async (stationId) => {
+  const calendar = await Calendar.create({ stationId });
 
   if (!calendar) {
     return null;

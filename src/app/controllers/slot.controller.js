@@ -1,11 +1,12 @@
 const CalendarService = require('../services/calendar.service');
 const SlotService = require('../services/slot.service');
 const UserService = require('../services/user.service');
+const StationService = require('../services/station.service');
 const util = require('../services/util.service');
 
 const create = async (req, res) => {
   try {
-    const { calendarId } = req.params;
+    const { calendarId, stationId } = req.params;
 
     const { initialDate, finalDate, qtdVaccine } = req.body;
 
@@ -46,6 +47,18 @@ const create = async (req, res) => {
       });
     }
 
+    const station = await StationService.getById(stationId);
+
+    const validationQuantity = station.qtdVaccine;
+
+    if (qtdVaccine > validationQuantity) {
+      return res.status(400).json({ error: 'Vacinas insuficientes' });
+    }
+
+    if (!station) {
+      return res.status(400).json({ error: 'Posto não encontrado' });
+    }
+
     const calendar = await CalendarService.getById(calendarId);
 
     if (!calendar) {
@@ -75,6 +88,8 @@ const create = async (req, res) => {
         .status(400)
         .json({ error: 'Não foi possível criar um novo slot' });
     }
+
+    await StationService.removeVaccines({ quantity: qtdVaccine, stationId });
 
     return res.status(201).json({ slot });
   } catch (error) {
