@@ -8,7 +8,6 @@ const AuthRoute = require('./app/routes/auth.route');
 const RegisterRoute = require('./app/routes/register.route');
 const UserRoute = require('./app/routes/user.route');
 const PreUserRoute = require('./app/routes/preUser.route');
-const CalendarRoute = require('./app/routes/calendar.route');
 const SlotRoute = require('./app/routes/slot.route');
 const StationRoute = require('./app/routes/station.route');
 
@@ -26,7 +25,6 @@ router.use('/user', RegisterRoute);
 router.use(AuthMiddleware.login);
 router.use('/user', UserRoute);
 router.use('/preUser', PreUserRoute);
-router.use('/calendar', CalendarRoute);
 router.use('/slot', SlotRoute);
 router.use('/station', StationRoute);
 

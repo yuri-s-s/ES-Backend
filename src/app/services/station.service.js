@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 
 const {
-  Station, Calendar, Slot, User,
+  Station, Calendar, Slot, User, Vaccine,
 } = require('../models');
 
 const create = async (data) => {
@@ -20,6 +20,10 @@ const getById = async (stationId) => {
       {
         model: Calendar,
         as: 'calendar',
+      },
+      {
+        model: Vaccine,
+        as: 'vaccines',
       },
     ],
   });
@@ -51,6 +55,10 @@ const getWithCalendar = async (stationId) => {
             ],
           },
         ],
+      },
+      {
+        model: Vaccine,
+        as: 'vaccines',
       },
     ],
   });
@@ -177,6 +185,46 @@ const remove = async (stationId) => {
   return station;
 };
 
+const addVaccines = async (data) => {
+  const { stationId, quantity } = data;
+
+  const station = await Station.findByPk(stationId);
+
+  if (!station) {
+    return null;
+  }
+
+  let quantityVaccines = station.dataValues.qtdVaccine;
+
+  quantityVaccines += quantity;
+
+  await station.update({
+    qtdVaccine: quantityVaccines,
+  });
+
+  return station;
+};
+
+const removeVaccines = async (data) => {
+  const { stationId, quantity } = data;
+
+  const station = await Station.findByPk(stationId);
+
+  if (!station) {
+    return null;
+  }
+
+  let quantityVaccines = station.dataValues.qtdVaccine;
+
+  quantityVaccines -= quantity;
+
+  await station.update({
+    qtdVaccine: quantityVaccines,
+  });
+
+  return station;
+};
+
 module.exports = {
   create,
   getById,
@@ -184,4 +232,6 @@ module.exports = {
   getAll,
   remove,
   getWithCalendar,
+  addVaccines,
+  removeVaccines,
 };

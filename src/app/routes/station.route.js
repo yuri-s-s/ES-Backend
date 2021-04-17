@@ -4,8 +4,14 @@ const router = express.Router();
 
 const StationController = require('../controllers/station.controller');
 
+const VaccineRoute = require('./vaccine.route');
+const CalendarRoute = require('./calendar.route');
+
 const permission = require('../middlewares/permission.middleware');
 const { ADMIN, CLIENT } = require('../enums/permission.enum');
+
+router.use('/:stationId/vaccine/', VaccineRoute);
+router.use('/:stationId/calendar/', CalendarRoute);
 
 router.post('/', permission(ADMIN), StationController.create);
 router.get('/:stationId', permission(CLIENT), StationController.getById);

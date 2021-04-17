@@ -1,13 +1,16 @@
 const express = require('express');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 const CalendarController = require('../controllers/calendar.controller');
 
-const permission = require('../middlewares/permission.middleware');
-const { MANAGER, CLIENT } = require('../enums/permission.enum');
+const SlotRoute = require('./slot.route');
 
-router.post('/', permission(MANAGER), CalendarController.create);
+const permission = require('../middlewares/permission.middleware');
+const { CLIENT } = require('../enums/permission.enum');
+
+router.use('/:calendarId/slot/', SlotRoute);
+
 router.get(
   '/:calendarId',
   permission(CLIENT),
