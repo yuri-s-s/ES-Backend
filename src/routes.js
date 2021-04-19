@@ -10,6 +10,7 @@ const UserRoute = require('./app/routes/user.route');
 const PreUserRoute = require('./app/routes/preUser.route');
 const CalendarRoute = require('./app/routes/calendar.route');
 const SlotRoute = require('./app/routes/slot.route');
+const ResetPassword = require('./app/routes/resetPassword.route');
 
 // public routes
 
@@ -19,6 +20,7 @@ router.get('/', (req, res) => {
 
 router.use('/auth', AuthRoute);
 router.use('/user', RegisterRoute);
+router.use('/password', ResetPassword);
 
 // private routes
 

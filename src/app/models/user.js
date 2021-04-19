@@ -30,6 +30,8 @@ module.exports = (sequelize, DataTypes) => {
       passwordHash: DataTypes.STRING,
       role: DataTypes.STRING,
       password: DataTypes.VIRTUAL,
+      passwordResetToken: DataTypes.STRING,
+      passwordResetExpires: DataTypes.DATE,
     },
 
     {
@@ -45,6 +47,10 @@ module.exports = (sequelize, DataTypes) => {
 
     return user;
   });
+
+  User.prototype.checkPassword = function (password) {
+    return bcrypt.compare(password, this.passwordHash);
+  };
 
   return User;
 };

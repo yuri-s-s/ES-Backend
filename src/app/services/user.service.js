@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const bcrypt = require('bcryptjs');
 
 const { User } = require('../models');
 const util = require('./util.service');
@@ -134,6 +135,21 @@ const getByEmail = async (email) => {
   return user;
 };
 
+const getByToken = async (token) => {
+  const user = await User.findOne({
+    attributes: ['id', 'passwordResetExpires'],
+    where: {
+      passwordResetToken: token,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return user;
+};
+
 const remove = async (id) => {
   const user = await User.findByPk(id, {
     attributes: ['id', 'name', 'email', 'cpf', 'role'],
@@ -186,14 +202,73 @@ const associateUserFirstSlot = async (slotId, userId) => {
   return user;
 };
 
+const checkPassword = async (password, id) => {
+  const user = await User.findByPk(id);
+
+  const verifyPassword = await bcrypt.compare(password, user.passwordHash);
+
+  if (!verifyPassword) {
+    return null;
+  }
+
+  return true;
+};
+
+const alterPassword = async (id, password) => {
+  const user = await User.findByPk(id);
+
+  if (!user) {
+    return null;
+  }
+
+  await user.update({
+    passwordResetToken: null,
+    passwordResetExpires: null,
+    password,
+  });
+
+  delete user.dataValues.password;
+  delete user.dataValues.passwordHash;
+  delete user.dataValues.updatedAt;
+  delete user.dataValues.createdAt;
+  delete user.dataValues.passwordResetToken;
+  delete user.dataValues.passwordResetExpires;
+
+  return user;
+};
+
+const updateToken = async (id, data) => {
+  const user = await User.findByPk(id);
+  const { passwordResetToken, passwordResetExpires } = data;
+
+  if (!user) {
+    return null;
+  }
+
+  await user.update({ passwordResetToken, passwordResetExpires });
+
+  delete user.dataValues.password;
+  delete user.dataValues.passwordHash;
+  delete user.dataValues.updatedAt;
+  delete user.dataValues.createdAt;
+  delete user.dataValues.passwordResetToken;
+  delete user.dataValues.passwordResetExpires;
+
+  return user;
+};
+
 module.exports = {
   create,
   getAll,
   getById,
   getByCpf,
   getByEmail,
+  getByToken,
   remove,
   update,
   updateRole,
   associateUserFirstSlot,
+  checkPassword,
+  alterPassword,
+  updateToken,
 };
