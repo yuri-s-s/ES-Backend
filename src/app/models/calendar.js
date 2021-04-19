@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Calendar.hasMany(models.Slot, { foreignKey: 'calendarId', as: 'slots' });
+      Calendar.belongsTo(models.Station, {
+        foreignKey: 'stationId',
+        as: 'station',
+      });
     }
   }
   Calendar.init(
