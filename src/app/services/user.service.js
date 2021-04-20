@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 
-const { User } = require('../models');
+const { User, Station } = require('../models');
 const util = require('./util.service');
 
 const create = async (data) => {
@@ -73,16 +73,34 @@ const getAll = async (query) => {
       limit: pageSize,
       offset,
       distinct: true,
-      attributes: ['id', 'name', 'email', 'cpf', 'role', 'preUserId'],
+      attributes: [
+        'id',
+        'name',
+        'email',
+        'cpf',
+        'role',
+        'preUserId',
+        'stationId',
+      ],
       where,
+      order: [['id', 'ASC']],
     };
     users = await User.findAndCountAll(options);
 
     users.pages = Math.ceil(users.count / pageSize);
   } else {
     users = await User.findAll({
-      attributes: ['id', 'name', 'email', 'cpf', 'role', 'preUserId'],
+      attributes: [
+        'id',
+        'name',
+        'email',
+        'cpf',
+        'role',
+        'preUserId',
+        'stationId',
+      ],
       where,
+      order: [['id', 'ASC']],
     });
   }
 
@@ -95,7 +113,15 @@ const getAll = async (query) => {
 
 const getById = async (id) => {
   const user = await User.findByPk(id, {
-    attributes: ['id', 'name', 'email', 'cpf', 'role', 'firstSlotId'],
+    attributes: [
+      'id',
+      'name',
+      'email',
+      'cpf',
+      'role',
+      'firstSlotId',
+      'stationId',
+    ],
   });
 
   if (!user) {
@@ -257,6 +283,60 @@ const updateToken = async (id, data) => {
   return user;
 };
 
+const associateManagerStation = async (userId, stationId) => {
+  const user = await User.findByPk(userId, {
+    attributes: ['id', 'name', 'email', 'cpf', 'role', 'stationId'],
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  await user.update({ stationId });
+
+  return user;
+};
+
+const removeAssociateManagerStation = async (userId) => {
+  const user = await User.findByPk(userId, {
+    attributes: ['id', 'name', 'email', 'cpf', 'role', 'stationId'],
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  await user.update({ stationId: null });
+
+  return user;
+};
+
+const getStationByUser = async (id) => {
+  const user = await User.findByPk(id, {
+    attributes: [
+      'id',
+      'name',
+      'email',
+      'cpf',
+      'role',
+      'firstSlotId',
+      'stationId',
+    ],
+    include: [
+      {
+        model: Station,
+        as: 'managerStation',
+      },
+    ],
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return user;
+};
+
 module.exports = {
   create,
   getAll,
@@ -271,4 +351,7 @@ module.exports = {
   checkPassword,
   alterPassword,
   updateToken,
+  associateManagerStation,
+  removeAssociateManagerStation,
+  getStationByUser,
 };
