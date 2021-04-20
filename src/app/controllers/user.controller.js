@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const UserService = require('../services/user.service');
 const PreUserService = require('../services/preUser.service');
 const EmailService = require('../services/email.service');
+const StationService = require('../services/station.service');
 
 function validateEmail(email) {
   const validate = /\S+@\S+\.\S+/;
@@ -18,7 +19,8 @@ function validateCpf(cpf) {
 function validatePassword(password) {
   if (password.length < 8) {
     return false;
-  } if (/^[a-zA-Z0-9]+$/.test(password)) {
+  }
+  if (/^[a-zA-Z0-9]+$/.test(password)) {
     return true;
   }
   return false;
@@ -59,12 +61,10 @@ const create = async (req, res) => {
     }
 
     if (!validatePassword(password)) {
-      return res
-        .status(400)
-        .json({
-          error:
-            'A senha deve conter pelo menos 8 caracteres, uma letra maiuscula e um numero',
-        });
+      return res.status(400).json({
+        error:
+          'A senha deve conter pelo menos 8 caracteres, uma letra maiuscula e um numero',
+      });
     }
 
     const verifyUser = await UserService.getByCpf(newCpf);
@@ -206,12 +206,10 @@ const alterPassword = async (req, res) => {
     const validation = validatePassword(newPassword);
 
     if (!validation) {
-      return res
-        .status(400)
-        .json({
-          error:
-            'A senha deve conter pelo menos 8 caracteres, uma letra maiuscula e um numero',
-        });
+      return res.status(400).json({
+        error:
+          'A senha deve conter pelo menos 8 caracteres, uma letra maiuscula e um numero',
+      });
     }
 
     const newUser = await UserService.alterPassword(userId, newPassword);
@@ -271,12 +269,10 @@ const resetPassword = async (req, res) => {
     const validation = validatePassword(password);
 
     if (!validation) {
-      return res
-        .status(400)
-        .json({
-          error:
-            'A senha deve conter pelo menos 8 caracteres, uma letra maiuscula e um numero',
-        });
+      return res.status(400).json({
+        error:
+          'A senha deve conter pelo menos 8 caracteres, uma letra maiuscula e um numero',
+      });
     }
 
     const newUser = await UserService.alterPassword(
@@ -296,6 +292,81 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const associateManagerStation = async (req, res) => {
+  try {
+    const { userId, stationId } = req.params;
+
+    const user = await UserService.getById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'O usuário não foi encontrado' });
+    }
+
+    if (user.stationId) {
+      return res
+        .status(404)
+        .json({ error: 'O usuário já é gerente de outro posto' });
+    }
+
+    if (user.role !== 'manager') {
+      return res
+        .status(404)
+        .json({ error: 'O tipo do usuário deve ser gerente' });
+    }
+
+    const station = await StationService.getById(stationId);
+
+    if (!station) {
+      return res.status(404).json({ error: 'O posto não foi encontrado' });
+    }
+
+    const newAssociate = await UserService.associateManagerStation(
+      userId,
+      stationId,
+    );
+
+    return res.status(200).json({ newAssociate });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
+const removeAssociateManagerStation = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await UserService.getById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'O usuário não foi encontrado' });
+    }
+
+    const removeAssociate = await UserService.removeAssociateManagerStation(
+      userId,
+    );
+
+    return res.status(200).json({ removeAssociate });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
+const getStationByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await UserService.getStationByUser(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'O usuário não foi encontrado' });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
 module.exports = {
   create,
   getAll,
@@ -305,4 +376,7 @@ module.exports = {
   alterPassword,
   forgotPassword,
   resetPassword,
+  associateManagerStation,
+  removeAssociateManagerStation,
+  getStationByUser,
 };
