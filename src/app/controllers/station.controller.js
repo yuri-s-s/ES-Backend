@@ -1,5 +1,7 @@
 const StationService = require('../services/station.service');
 const CalendarService = require('../services/calendar.service');
+const UserService = require('../services/user.service');
+const VaccineService = require('../services/vaccine.service');
 
 const create = async (req, res) => {
   try {
@@ -145,6 +147,48 @@ const remove = async (req, res) => {
   }
 };
 
+const insertFirstVaccine = async (req, res) => {
+  try {
+    const { stationId, vaccineId, userId } = req.params;
+
+    const station = await StationService.getById(stationId);
+
+    if (!station) {
+      return res.status(400).json({ error: 'Posto não encontrado' });
+    }
+
+    const vaccine = await VaccineService.getById(vaccineId);
+
+    if (!vaccine) {
+      return res.status(400).json({ error: 'Vacina não encontrada' });
+    }
+
+    if (vaccine.quantity <= 0) {
+      return res.status(400).json({ error: 'Vacinas acabaram' });
+    }
+
+    const user = await UserService.getById(userId);
+
+    if (!user) {
+      return res.status(400).json({ error: 'Usuário não encontrado' });
+    }
+
+    if (user.firstVaccine) {
+      return res
+        .status(400)
+        .json({ error: 'Esse usuário ja tomou a primeira dose' });
+    }
+
+    await VaccineService.decrementVaccines(vaccineId);
+
+    const newUser = await UserService.insertFirstVaccine(userId, vaccine.name);
+
+    return res.status(201).json({ newUser });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
 module.exports = {
   create,
   getById,
@@ -152,4 +196,5 @@ module.exports = {
   getAll,
   remove,
   getWithCalendar,
+  insertFirstVaccine,
 };

@@ -23,5 +23,10 @@ router.get(
 router.get('/', permission(CLIENT), StationController.getAll);
 router.put('/:stationId', permission(ADMIN), StationController.update);
 router.delete('/:stationId', permission(ADMIN), StationController.remove);
+router.post(
+  '/:stationId/vaccine/:vaccineId/user/:userId/firstVaccine',
+  permission(CLIENT),
+  StationController.insertFirstVaccine,
+);
 
 module.exports = router;

@@ -46,8 +46,27 @@ const addVaccines = async (data) => {
   return vaccine;
 };
 
+const decrementVaccines = async (vaccineId) => {
+  const vaccine = await Vaccine.findByPk(vaccineId);
+
+  if (!vaccine) {
+    return null;
+  }
+
+  let quantityVaccines = vaccine.dataValues.quantity;
+
+  quantityVaccines -= 1;
+
+  await vaccine.update({
+    quantity: quantityVaccines,
+  });
+
+  return vaccine;
+};
+
 module.exports = {
   create,
   getById,
   addVaccines,
+  decrementVaccines,
 };

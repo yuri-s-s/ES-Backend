@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
       password: DataTypes.VIRTUAL,
       passwordResetToken: DataTypes.STRING,
       passwordResetExpires: DataTypes.DATE,
+      firstVaccine: DataTypes.STRING,
+      secondVaccine: DataTypes.STRING,
+      firstVaccineDate: DataTypes.DATE,
+      secondVaccineDate: DataTypes.DATE,
     },
 
     {
