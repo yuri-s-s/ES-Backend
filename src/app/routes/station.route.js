@@ -28,5 +28,9 @@ router.post(
   permission(CLIENT),
   StationController.insertFirstVaccine,
 );
-
+router.post(
+  '/:stationId/vaccine/:vaccineId/user/:userId/secondVaccine',
+  permission(CLIENT),
+  StationController.insertSecondVaccine,
+);
 module.exports = router;
