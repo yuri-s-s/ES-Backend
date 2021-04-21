@@ -173,8 +173,75 @@ const associateUserFirstSlot = async (req, res) => {
   }
 };
 
+const associateUserSecondSlot = async (req, res) => {
+  try {
+    const { calendarId, slotId, userId } = req.params;
+
+    let slot = await SlotService.getSlot(calendarId, slotId);
+
+    if (!slot) {
+      return res.status(400).json({ error: 'Nenhum slot encontrado' });
+    }
+
+    const quantityAvailable = await SlotService.getVaccineAvailableBySlot(
+      slotId,
+    );
+
+    if (!quantityAvailable) {
+      return res
+        .status(400)
+        .json({ error: 'Estoque de vacinas esgotadas para esse slot' });
+    }
+
+    const user = await UserService.getById(userId);
+
+    if (!user) {
+      return res.status(400).json({ error: 'O usuário passado não existe' });
+    }
+
+    if (!user.firstSlotId) {
+      return res
+        .status(400)
+        .json({ error: 'O usuário ainda não se agendou para a primeira dose' });
+    }
+
+    if (!user.firstVaccine) {
+      return res
+        .status(400)
+        .json({ error: 'O usuário ainda não tomou a primeira dose' });
+    }
+
+    if (user.secondVaccine) {
+      return res
+        .status(400)
+        .json({ error: 'O usuário já tomou a segunda dose' });
+    }
+
+    if (user.secondSlotId) {
+      return res
+        .status(400)
+        .json({ error: 'O usuário já está agendado em um slot' });
+    }
+
+    const associate = await UserService.associateUserSecondSlot(slotId, userId);
+
+    if (!associate) {
+      return res
+        .status(400)
+        .json({ error: 'Não possível realizar o agendamento' });
+    }
+
+    slot = await SlotService.getSlot(calendarId, slotId);
+
+    return res.status(200).json({ slot });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
 module.exports = {
   create,
   verifySlot,
   associateUserFirstSlot,
+  associateUserSecondSlot,
 };
