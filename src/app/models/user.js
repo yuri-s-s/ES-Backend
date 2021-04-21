@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'firstSlotId',
         as: 'slot',
       });
+      User.belongsTo(models.Slot, {
+        foreignKey: 'secondSlotId',
+        as: 'secondSlot',
+      });
       User.belongsTo(models.Station, {
         foreignKey: 'stationId',
         as: 'managerStation',

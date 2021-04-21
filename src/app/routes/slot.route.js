@@ -15,6 +15,12 @@ router.post(
   SlotController.associateUserFirstSlot,
 );
 
+router.post(
+  '/:slotId/user/:userId/secondAssociate',
+  permission(CLIENT),
+  SlotController.associateUserSecondSlot,
+);
+
 router.get('/existSlot', permission(MANAGER), SlotController.verifySlot);
 
 module.exports = router;

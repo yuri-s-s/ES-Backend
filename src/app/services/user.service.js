@@ -120,6 +120,7 @@ const getById = async (id) => {
       'cpf',
       'role',
       'firstSlotId',
+      'secondSlotId',
       'stationId',
       'firstVaccine',
       'secondVaccine',
@@ -227,6 +228,16 @@ const associateUserFirstSlot = async (slotId, userId) => {
 
   await user.update({
     firstSlotId: slotId,
+  });
+
+  return user;
+};
+
+const associateUserSecondSlot = async (slotId, userId) => {
+  const user = await User.findByPk(userId);
+
+  await user.update({
+    secondSlotId: slotId,
   });
 
   return user;
@@ -386,4 +397,5 @@ module.exports = {
   removeAssociateManagerStation,
   getStationByUser,
   insertFirstVaccine,
+  associateUserSecondSlot,
 };
