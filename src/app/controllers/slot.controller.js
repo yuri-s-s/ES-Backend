@@ -178,28 +178,97 @@ const cancelAppointment = async (req, res) => {
     const { userId, slotId } = req.params;
     const user = await UserService.getById(userId);
 
-    if(!user) {
-      return res.status(404).json({ error: 'Usuário nao encontrado.' })
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário nao encontrado.' });
     }
 
-    const firstSlotId = user.firstSlotId;
-    const secondSlotId = user.secondSlotId;
+    const { firstSlotId } = user;
+    const { secondSlotId } = user;
 
-    if(parseInt(firstSlotId) !== parseInt(slotId) && parseInt(secondSlotId) !== parseInt(slotId)) {
-      
-      return res.status(404).json({ error: 'Cancelamento nao e possivel. Usuario nao possui agendamento.' });
-
-    } else {
-      if (parseInt(firstSlotId) === parseInt(slotId)) {
-        const newUser = await UserService.removeFirstSlotId(userId);
-
-        return res.status(200).json({ newUser });
-      } else {
-        const newUser = await UserService.removeSecondSlotId(userId);
-
-        return res.status(200).json({ newUser });
-      }
+    if (
+      parseInt(firstSlotId, 10) !== parseInt(slotId, 10)
+      && parseInt(secondSlotId, 10) !== parseInt(slotId, 10)
+    ) {
+      return res
+        .status(404)
+        .json({
+          error: 'Cancelamento nao e possivel. Usuario nao possui agendamento.',
+        });
     }
+    if (parseInt(firstSlotId, 10) === parseInt(slotId, 10)) {
+      const newUser = await UserService.removeFirstSlotId(userId);
+
+      return res.status(200).json({ newUser });
+    }
+    const newUser = await UserService.removeSecondSlotId(userId);
+
+    return res.status(200).json({ newUser });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
+const associateUserSecondSlot = async (req, res) => {
+  try {
+    const { calendarId, slotId, userId } = req.params;
+
+    let slot = await SlotService.getSlot(calendarId, slotId);
+
+    if (!slot) {
+      return res.status(400).json({ error: 'Nenhum slot encontrado' });
+    }
+
+    const quantityAvailable = await SlotService.getVaccineAvailableBySlot(
+      slotId,
+    );
+
+    if (!quantityAvailable) {
+      return res
+        .status(400)
+        .json({ error: 'Estoque de vacinas esgotadas para esse slot' });
+    }
+
+    const user = await UserService.getById(userId);
+
+    if (!user) {
+      return res.status(400).json({ error: 'O usuário passado não existe' });
+    }
+
+    if (!user.firstSlotId) {
+      return res
+        .status(400)
+        .json({ error: 'O usuário ainda não se agendou para a primeira dose' });
+    }
+
+    if (!user.firstVaccine) {
+      return res
+        .status(400)
+        .json({ error: 'O usuário ainda não tomou a primeira dose' });
+    }
+
+    if (user.secondVaccine) {
+      return res
+        .status(400)
+        .json({ error: 'O usuário já tomou a segunda dose' });
+    }
+
+    if (user.secondSlotId) {
+      return res
+        .status(400)
+        .json({ error: 'O usuário já está agendado em um slot' });
+    }
+
+    const associate = await UserService.associateUserSecondSlot(slotId, userId);
+
+    if (!associate) {
+      return res
+        .status(400)
+        .json({ error: 'Não possível realizar o agendamento' });
+    }
+
+    slot = await SlotService.getSlot(calendarId, slotId);
+
+    return res.status(200).json({ slot });
   } catch (error) {
     return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
   }
@@ -210,4 +279,5 @@ module.exports = {
   verifySlot,
   associateUserFirstSlot,
   cancelAppointment,
+  associateUserSecondSlot,
 };
