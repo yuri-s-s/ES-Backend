@@ -222,6 +222,30 @@ const updateRole = async (id, role, preUserId) => {
   return user;
 };
 
+const removeFirstSlotId = async (id) => {
+  const user = await User.findByPk(id);
+
+  if (!user) {
+    return null;
+  }
+
+  await user.update({ firstSlotId: null });
+
+  return user;
+};
+
+const removeSecondSlotId = async (id) => {
+  const user = await User.findByPk(id);
+
+  if (!user) {
+    return null;
+  }
+
+  await user.update({ firstSlotId: null });
+
+  return user;
+};
+
 const associateUserFirstSlot = async (slotId, userId) => {
   const user = await User.findByPk(userId);
 
@@ -378,6 +402,8 @@ module.exports = {
   remove,
   update,
   updateRole,
+  removeFirstSlotId,
+  removeSecondSlotId,
   associateUserFirstSlot,
   checkPassword,
   alterPassword,

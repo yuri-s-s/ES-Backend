@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const UserController = require('../controllers/user.controller');
+const SlotController = require('../controllers/slot.controller');
 
 const permission = require('../middlewares/permission.middleware');
 const { ADMIN, CLIENT } = require('../enums/permission.enum');
@@ -31,5 +32,6 @@ router.put(
   permission(ADMIN),
   UserController.removeAssociateManagerStation,
 );
+router.put('/:userId/cancel/:slotId/', permission(CLIENT), SlotController.cancelAppointment);
 
 module.exports = router;

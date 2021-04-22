@@ -173,8 +173,41 @@ const associateUserFirstSlot = async (req, res) => {
   }
 };
 
+const cancelAppointment = async (req, res) => {
+  try {
+    const { userId, slotId } = req.params;
+    const user = await UserService.getById(userId);
+
+    if(!user) {
+      return res.status(404).json({ error: 'Usuário nao encontrado.' })
+    }
+
+    const firstSlotId = user.firstSlotId;
+    const secondSlotId = user.secondSlotId;
+
+    if(parseInt(firstSlotId) !== parseInt(slotId) && parseInt(secondSlotId) !== parseInt(slotId)) {
+      
+      return res.status(404).json({ error: 'Cancelamento nao e possivel. Usuario nao possui agendamento.' });
+
+    } else {
+      if (parseInt(firstSlotId) === parseInt(slotId)) {
+        const newUser = await UserService.removeFirstSlotId(userId);
+
+        return res.status(200).json({ newUser });
+      } else {
+        const newUser = await UserService.removeSecondSlotId(userId);
+
+        return res.status(200).json({ newUser });
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
 module.exports = {
   create,
   verifySlot,
   associateUserFirstSlot,
+  cancelAppointment,
 };

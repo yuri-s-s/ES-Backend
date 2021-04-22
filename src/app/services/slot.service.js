@@ -63,9 +63,29 @@ const getVaccineAvailableBySlot = async (slotId) => {
   return true;
 };
 
+const updateVaccineQuantity = async (slotId) => {
+  const slot = Slot.findOne({
+    where: {
+      id: slotId
+    }
+  });
+
+  if(!slot) {
+    return null;
+  }
+
+  let vaccineAvailable = slot.qtdVaccine + 1;
+  await slot.update({
+    quantity: vaccineAvailable
+  });
+
+  return slot;
+};
+
 module.exports = {
   create,
   verifySlotExist,
   getSlot,
   getVaccineAvailableBySlot,
+  updateVaccineQuantity,
 };
