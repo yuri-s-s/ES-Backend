@@ -173,6 +173,41 @@ const associateUserFirstSlot = async (req, res) => {
   }
 };
 
+const cancelAppointment = async (req, res) => {
+  try {
+    const { userId, slotId } = req.params;
+    const user = await UserService.getById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário nao encontrado.' });
+    }
+
+    const { firstSlotId } = user;
+    const { secondSlotId } = user;
+
+    if (
+      parseInt(firstSlotId, 10) !== parseInt(slotId, 10)
+      && parseInt(secondSlotId, 10) !== parseInt(slotId, 10)
+    ) {
+      return res
+        .status(404)
+        .json({
+          error: 'Cancelamento nao e possivel. Usuario nao possui agendamento.',
+        });
+    }
+    if (parseInt(firstSlotId, 10) === parseInt(slotId, 10)) {
+      const newUser = await UserService.removeFirstSlotId(userId);
+
+      return res.status(200).json({ newUser });
+    }
+    const newUser = await UserService.removeSecondSlotId(userId);
+
+    return res.status(200).json({ newUser });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
 const associateUserSecondSlot = async (req, res) => {
   try {
     const { calendarId, slotId, userId } = req.params;
@@ -243,5 +278,6 @@ module.exports = {
   create,
   verifySlot,
   associateUserFirstSlot,
+  cancelAppointment,
   associateUserSecondSlot,
 };

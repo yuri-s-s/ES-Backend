@@ -1,7 +1,6 @@
 const { Vaccine } = require('../models');
 
 const create = async (data) => {
-  console.log(data);
   const vaccine = await Vaccine.create(data);
 
   if (!vaccine) {
