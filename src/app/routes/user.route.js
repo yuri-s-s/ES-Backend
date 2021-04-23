@@ -32,6 +32,10 @@ router.put(
   permission(ADMIN),
   UserController.removeAssociateManagerStation,
 );
-router.put('/:userId/cancel/:slotId/', permission(CLIENT), SlotController.cancelAppointment);
+router.put(
+  '/:userId/cancel/:slotId/',
+  permission(CLIENT),
+  SlotController.cancelAppointment,
+);
 
 module.exports = router;

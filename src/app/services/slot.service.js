@@ -66,17 +66,17 @@ const getVaccineAvailableBySlot = async (slotId) => {
 const updateVaccineQuantity = async (slotId) => {
   const slot = Slot.findOne({
     where: {
-      id: slotId
-    }
+      id: slotId,
+    },
   });
 
-  if(!slot) {
+  if (!slot) {
     return null;
   }
 
-  let vaccineAvailable = slot.qtdVaccine + 1;
+  const vaccineAvailable = slot.qtdVaccine + 1;
   await slot.update({
-    quantity: vaccineAvailable
+    quantity: vaccineAvailable,
   });
 
   return slot;

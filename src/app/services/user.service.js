@@ -224,7 +224,9 @@ const updateRole = async (id, role, preUserId) => {
 };
 
 const removeFirstSlotId = async (id) => {
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(id, {
+    attributes: ['id', 'name', 'firstSlotId', 'secondSlotId'],
+  });
 
   if (!user) {
     return null;
@@ -236,13 +238,15 @@ const removeFirstSlotId = async (id) => {
 };
 
 const removeSecondSlotId = async (id) => {
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(id, {
+    attributes: ['id', 'name', 'firstSlotId', 'secondSlotId'],
+  });
 
   if (!user) {
     return null;
   }
 
-  await user.update({ firstSlotId: null });
+  await user.update({ secondSlotId: null });
 
   return user;
 };
