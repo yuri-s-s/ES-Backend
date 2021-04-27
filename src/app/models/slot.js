@@ -2,11 +2,6 @@ const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class Slot extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       Slot.belongsTo(models.Calendar, {
         foreignKey: 'calendarId',
@@ -23,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       initialDate: DataTypes.DATE,
       finalDate: DataTypes.DATE,
       qtdVaccine: DataTypes.INTEGER,
+      priority: DataTypes.STRING,
     },
     {
       sequelize,

@@ -8,7 +8,9 @@ const create = async (req, res) => {
   try {
     const { calendarId, stationId } = req.params;
 
-    const { initialDate, finalDate, qtdVaccine } = req.body;
+    const {
+      initialDate, finalDate, qtdVaccine, priority,
+    } = req.body;
 
     if (!initialDate) {
       return res
@@ -79,6 +81,7 @@ const create = async (req, res) => {
       initialDate,
       finalDate,
       qtdVaccine,
+      priority,
     };
 
     const slot = await SlotService.create(data);
@@ -189,11 +192,9 @@ const cancelAppointment = async (req, res) => {
       parseInt(firstSlotId, 10) !== parseInt(slotId, 10)
       && parseInt(secondSlotId, 10) !== parseInt(slotId, 10)
     ) {
-      return res
-        .status(404)
-        .json({
-          error: 'Cancelamento nao e possivel. Usuario nao possui agendamento.',
-        });
+      return res.status(404).json({
+        error: 'Cancelamento nao e possivel. Usuario nao possui agendamento.',
+      });
     }
     if (parseInt(firstSlotId, 10) === parseInt(slotId, 10)) {
       const newUser = await UserService.removeFirstSlotId(userId);
