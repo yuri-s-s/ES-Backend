@@ -1,3 +1,5 @@
+/* eslint no-restricted-syntax: "error" */
+
 const CalendarService = require('../services/calendar.service');
 const SlotService = require('../services/slot.service');
 const UserService = require('../services/user.service');
@@ -275,10 +277,40 @@ const associateUserSecondSlot = async (req, res) => {
   }
 };
 
+const expiredJob = async () => {
+  try {
+    const slots = await SlotService.getSlotsByDate();
+
+    for await (const slot of slots) {
+      const users = await UserService.getBySlot(slot.id);
+      const calendar = await CalendarService.getById(slot.calendarId);
+      const { stationId } = calendar.dataValues;
+      await Promise.all(
+        users.rows.map(async (user) => {
+          if (user.firstSlotId) {
+            if (!user.firstVaccine) {
+              await UserService.updateFirstSlotId(user.id);
+              await StationService.addVaccines({ stationId, quantity: 1 });
+            } else if (user.secondSlotId) {
+              if (!user.secondVaccine) {
+                await UserService.updateSecondSlotId(user.id);
+                await StationService.addVaccines({ stationId, quantity: 1 });
+              }
+            }
+          }
+        }),
+      );
+    }
+  } catch (error) {
+    console.info(error);
+  }
+};
+
 module.exports = {
   create,
   verifySlot,
   associateUserFirstSlot,
   cancelAppointment,
   associateUserSecondSlot,
+  expiredJob,
 };

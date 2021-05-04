@@ -1,3 +1,5 @@
+const dayjs = require('dayjs');
+const { Op } = require('sequelize');
 const { Slot, User } = require('../models');
 
 const create = async (data) => {
@@ -82,10 +84,36 @@ const updateVaccineQuantity = async (slotId) => {
   return slot;
 };
 
+async function getSlotsByDate() {
+  const date = dayjs(new Date()).subtract(3, 'hour');
+  const endDate = dayjs(date).subtract(1, 'day').toDate();
+  const initialDate = dayjs(date).subtract(2, 'day').toDate();
+
+  const slots = await Slot.findAll({
+    where: {
+      [Op.and]: [
+        {
+          finalDate: {
+            [Op.lte]: endDate,
+          },
+        },
+        {
+          initialDate: {
+            [Op.gte]: initialDate,
+          },
+        },
+      ],
+    },
+  });
+
+  return slots;
+}
+
 module.exports = {
   create,
   verifySlotExist,
   getSlot,
   getVaccineAvailableBySlot,
   updateVaccineQuantity,
+  getSlotsByDate,
 };

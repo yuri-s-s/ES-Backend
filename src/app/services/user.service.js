@@ -434,6 +434,42 @@ const insertSecondVaccine = async (id, vaccineName) => {
   return user;
 };
 
+const updateFirstSlotId = async (id) => {
+  const user = await User.findByPk(id);
+  if (!user) {
+    return null;
+  }
+
+  await user.update({
+    firstSlotId: null,
+  });
+
+  return user;
+};
+
+const updateSecondSlotId = async (id) => {
+  const user = await User.findByPk(id);
+  if (!user) {
+    return null;
+  }
+
+  await user.update({
+    secondSlotId: null,
+  });
+
+  return user;
+};
+
+const getBySlot = async (slotId) => {
+  const users = await User.findAndCountAll({
+    where: {
+      [Op.or]: [{ firstSlotId: slotId }, { secondSlotId: slotId }],
+    },
+  });
+
+  return users;
+};
+
 module.exports = {
   create,
   getAll,
@@ -456,4 +492,7 @@ module.exports = {
   insertFirstVaccine,
   associateUserSecondSlot,
   insertSecondVaccine,
+  updateFirstSlotId,
+  updateSecondSlotId,
+  getBySlot,
 };
