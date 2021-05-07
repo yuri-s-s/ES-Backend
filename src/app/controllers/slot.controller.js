@@ -306,6 +306,32 @@ const expiredJob = async () => {
   }
 };
 
+const removeSlot = async (req, res) => {
+  try {
+    const { calendarId, slotId } = req.params;
+
+    let slot = await SlotService.getSlot(calendarId, slotId);
+
+    if (!slot) {
+      return res.status(400).json({ error: 'Nenhum slot encontrado' });
+    }
+
+    slot = await SlotService.removeSlot(slotId);
+
+    if (!slot) {
+      return res
+        .status(400)
+        .json({
+          error: 'Não é possível remover um slot com agendamentos em andamento',
+        });
+    }
+
+    return res.status(200).json({ slot });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
 module.exports = {
   create,
   verifySlot,
@@ -313,4 +339,5 @@ module.exports = {
   cancelAppointment,
   associateUserSecondSlot,
   expiredJob,
+  removeSlot,
 };

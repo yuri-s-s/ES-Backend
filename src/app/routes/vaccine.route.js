@@ -15,4 +15,10 @@ router.put(
   VaccineController.addVaccines,
 );
 
+router.put(
+  '/:vaccineId/edit',
+  permission(MANAGER),
+  VaccineController.editVaccine,
+);
+
 module.exports = router;

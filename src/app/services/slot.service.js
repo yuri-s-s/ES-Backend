@@ -42,6 +42,23 @@ const getSlot = async (calendarId, slotId) => {
   return slot;
 };
 
+const removeSlot = async (slotId) => {
+  const slot = await Slot.findByPk(slotId, {
+    include: {
+      model: User,
+      as: 'users',
+    },
+  });
+
+  if (slot.users.length > 0) {
+    return null;
+  }
+
+  await slot.destroy();
+
+  return slot;
+};
+
 const getVaccineAvailableBySlot = async (slotId) => {
   const slot = await Slot.findOne({
     where: {
@@ -116,4 +133,5 @@ module.exports = {
   getVaccineAvailableBySlot,
   updateVaccineQuantity,
   getSlotsByDate,
+  removeSlot,
 };

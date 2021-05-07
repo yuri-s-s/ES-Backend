@@ -63,9 +63,31 @@ const decrementVaccines = async (vaccineId) => {
   return vaccine;
 };
 
+const editVaccine = async (data) => {
+  const { stationId, vaccineId, name } = data;
+
+  const vaccine = await Vaccine.findOne({
+    where: {
+      stationId,
+      id: vaccineId,
+    },
+  });
+
+  if (!vaccine) {
+    return null;
+  }
+
+  await vaccine.update({
+    name,
+  });
+
+  return vaccine;
+};
+
 module.exports = {
   create,
   getById,
   addVaccines,
   decrementVaccines,
+  editVaccine,
 };
