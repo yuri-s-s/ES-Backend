@@ -7,6 +7,9 @@ module.exports = {
     database: process.env.DB_DATABASE,
     host: process.env.DB_HOST,
     dialect: 'postgres',
+    dialectOptions: {
+      ssl: { rejectUnauthorized: false },
+    },
     define: {
       timestamps: true,
     },
@@ -37,6 +40,9 @@ module.exports = {
     host: process.env.DB_HOST,
     dialect: 'postgres',
     operatorsAliases: false,
+    dialectOptions: {
+      ssl: { rejectUnauthorized: false },
+    },
     options: {
       dialect: 'postgres',
       host: process.env.DB_HOST || 'localhost',
