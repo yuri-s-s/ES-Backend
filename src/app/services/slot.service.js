@@ -126,6 +126,69 @@ async function getSlotsByDate() {
   return slots;
 }
 
+async function getSlotsByCalendar(calendarId, query) {
+  const { initialDate, endDate } = query;
+
+  const newInitialDate = dayjs(
+    dayjs(initialDate).format('YYYY-MM-DD 00:00:00.000 +00:00'),
+  )
+    .add(1, 'day')
+    .toDate();
+  const newEndDate = dayjs(
+    dayjs(endDate).format('YYYY-MM-DD 00:00:00.000 +00:00'),
+  )
+    .add(1, 'day')
+    .toDate();
+
+  let where = {
+    calendarId,
+  };
+
+  if (initialDate && endDate) {
+    where = {
+      ...where,
+      [Op.and]: [
+        {
+          initialDate: {
+            [Op.between]: [newInitialDate, newEndDate],
+          },
+        },
+      ],
+    };
+  }
+
+  const page = parseInt(query.page, 10);
+  const pageSize = parseInt(query.pageSize, 10);
+  let offset = null;
+  let slots = null;
+
+  if (page && pageSize) offset = (page - 1) * pageSize;
+
+  if (offset !== null) {
+    const options = {
+      limit: pageSize,
+      offset,
+      distinct: true,
+      order: [['id', 'ASC']],
+      where,
+    };
+    slots = await Slot.findAndCountAll(options);
+
+    slots.pages = Math.ceil(slots.count / pageSize);
+  } else {
+    slots = await Slot.findAll({
+      where,
+      order: [['id', 'ASC']],
+    });
+  }
+
+  if (!slots) {
+    return null;
+  }
+
+  return slots;
+}
+
 module.exports = {
   create,
   verifySlotExist,
@@ -134,4 +197,5 @@ module.exports = {
   updateVaccineQuantity,
   getSlotsByDate,
   removeSlot,
+  getSlotsByCalendar,
 };

@@ -28,5 +28,6 @@ router.post(
 );
 
 router.get('/existSlot', permission(MANAGER), SlotController.verifySlot);
+router.get('/', permission(CLIENT), SlotController.getSlotsByCalendar);
 
 module.exports = router;

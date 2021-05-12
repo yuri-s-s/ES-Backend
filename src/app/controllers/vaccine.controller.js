@@ -96,8 +96,31 @@ const editVaccine = async (req, res) => {
   }
 };
 
+const getByStation = async (req, res) => {
+  try {
+    const { stationId } = req.params;
+
+    const station = await StationService.getById(stationId);
+
+    if (!station) {
+      return res.status(400).json({ error: 'Posto não encontrado' });
+    }
+
+    const vaccines = await VaccineService.getByStation(stationId, req.query);
+
+    if (!vaccines) {
+      return res.status(400).json({ error: 'Vacinas não encontradas' });
+    }
+
+    return res.status(201).json({ vaccines });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
 module.exports = {
   create,
   addVaccines,
   editVaccine,
+  getByStation,
 };
