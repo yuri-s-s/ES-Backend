@@ -10,4 +10,8 @@ const isValidDate = (date) => dayjs(date).isValid();
 
 const isCurrentDate = (initialDate, finalDate) => dayjs(initialDate).isAfter(finalDate);
 
-module.exports = { generateToken, isValidDate, isCurrentDate };
+const paginate = (array, pageSize, page) => array.slice((page - 1) * pageSize, page * pageSize);
+
+module.exports = {
+  generateToken, isValidDate, isCurrentDate, paginate,
+};

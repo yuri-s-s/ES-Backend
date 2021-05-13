@@ -366,6 +366,44 @@ const getSlotsByCalendar = async (req, res) => {
   }
 };
 
+const getUsersBySlot = async (req, res) => {
+  try {
+    const { calendarId, slotId } = req.params;
+
+    const { page, pageSize } = req.query;
+
+    const slot = await SlotService.getSlot(calendarId, slotId);
+
+    if (!slot) {
+      return res.status(400).json({ error: 'Nenhum slot encontrado' });
+    }
+
+    const usersSlot = await SlotService.getUsersBySlot(slotId, req.query);
+
+    if (!usersSlot) {
+      return res.status(400).json({
+        error: 'Nenhum usuário encontrado',
+      });
+    }
+
+    let users = usersSlot;
+
+    if (page && pageSize) {
+      const aux = util.paginate(usersSlot, pageSize, page);
+
+      users = {
+        count: aux.length,
+        pages: Math.ceil(usersSlot.length / pageSize),
+        rows: aux,
+      };
+    }
+
+    return res.status(200).json({ users });
+  } catch (error) {
+    return res.status(500).json({ error: `Ocorreu um erro: ${error.message}` });
+  }
+};
+
 module.exports = {
   create,
   verifySlot,
@@ -375,4 +413,5 @@ module.exports = {
   expiredJob,
   removeSlot,
   getSlotsByCalendar,
+  getUsersBySlot,
 };

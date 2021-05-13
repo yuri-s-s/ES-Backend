@@ -189,6 +189,60 @@ async function getSlotsByCalendar(calendarId, query) {
   return slots;
 }
 
+const getUsersBySlot = async (slotId, query) => {
+  const { name, cpf, id } = query;
+
+  let where = {};
+
+  if (id) {
+    where = {
+      ...where,
+      id,
+    };
+  }
+
+  if (name) {
+    where = {
+      ...where,
+      name: {
+        [Op.iLike]: `%${name}%`,
+      },
+    };
+  }
+
+  if (cpf) {
+    where = {
+      ...where,
+      cpf: {
+        [Op.iLike]: `%${cpf}%`,
+      },
+    };
+  }
+
+  const slot = await Slot.findByPk(slotId, {
+    include: {
+      required: false,
+      model: User,
+      as: 'users',
+      where,
+      attributes: {
+        exclude: [
+          'passwordHash',
+          'passwordResetToken',
+          'passwordResetExpires',
+          'createdAt',
+          'updatedAt',
+          'preUserId',
+        ],
+      },
+    },
+  });
+
+  const { users } = slot;
+
+  return users;
+};
+
 module.exports = {
   create,
   verifySlotExist,
@@ -198,4 +252,5 @@ module.exports = {
   getSlotsByDate,
   removeSlot,
   getSlotsByCalendar,
+  getUsersBySlot,
 };
